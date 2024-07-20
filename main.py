@@ -21,9 +21,11 @@ if not os.path.exists(save_path):
 
 # Baixa todos os reels
 profile = instaloader.Profile.from_username(L.context, username)
+
 for post in profile.get_posts():
-    # Verifica se o post é um vídeo e se a URL contém 'reel'
-    if post.typename == 'GraphVideo' and 'reel' in post.url:
+    print(f"Post: {post}, Type: {post.typename}, URL: {post.url}")
+    if post.typename == 'GraphVideo':
+        print("Downloading reel...")
         L.download_post(post, target=save_path)
 
 print(f"Todos os reels da conta @{username} foram salvos em {save_path}.")
