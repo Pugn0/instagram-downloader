@@ -20,14 +20,8 @@ if not os.path.exists(save_path):
 # Define a pasta de destino como o caminho de trabalho
 L.dirname_pattern = save_path
 
-# Faz o login no Instagram (opcional, mas recomendado para evitar limitações)
-# Descomente e preencha com suas credenciais se desejar fazer login
-# L.login('seu_usuario', 'sua_senha')
-
 # Baixa todos os reels
 profile = instaloader.Profile.from_username(L.context, username)
-
-video_count = 0
 
 # Função para baixar o post com tentativas e tratamento de exceção
 def download_post_with_retries(post, target):
@@ -44,15 +38,16 @@ def download_post_with_retries(post, target):
 
 for post in profile.get_posts():
     if post.typename == 'GraphVideo':
-        video_filename = f"{video_count + 1:03d}.mp4"
-        txt_filename = f"{video_count + 1:03d}.txt"
+        shortcode = post.shortcode
+        video_filename = f"{shortcode}.mp4"
+        txt_filename = f"{shortcode}.txt"
         
         video_final_path = os.path.join(save_path, video_filename)
         txt_path = os.path.join(save_path, txt_filename)
         
         # Verifica se o vídeo já existe
         if os.path.exists(video_final_path):
-            print(f"{video_final_path} já existe. Ignorando o download.")
+            print(f"Vídeo já existe: {video_final_path}")
         else:
             # Baixa apenas o vídeo com tentativas e tratamento de exceção
             download_post_with_retries(post, save_path)
@@ -62,6 +57,7 @@ for post in profile.get_posts():
                 file_path = os.path.join(save_path, filename)
                 if filename.endswith(".mp4") and filename.startswith(post.shortcode):
                     os.rename(file_path, video_final_path)
+                    print(f"Vídeo baixado: {video_final_path}")
                 elif not filename.endswith(".mp4") and not filename.endswith(".txt"):
                     os.remove(file_path)
             
@@ -71,8 +67,5 @@ for post in profile.get_posts():
             
             with open(txt_path, "w", encoding="utf-8") as f:
                 f.write(f"Descrição:\n{description}\n\nTags:\n{tags}")
-            
-            video_count += 1
 
-print(f"Todos os reels da conta @{username} foram salvos em {save_path}.")
-print(f"Total de vídeos baixados: {video_count}")
+print(f"\nTodos os reels da conta @{username} foram salvos em {save_path}.")
